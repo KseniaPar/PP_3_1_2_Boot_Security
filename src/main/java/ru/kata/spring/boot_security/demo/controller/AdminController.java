@@ -8,6 +8,8 @@ import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
+import java.security.Principal;
+
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
@@ -24,37 +26,27 @@ public class AdminController {
     }
 
     @GetMapping
-    public String showAllUsers(Model model) {
+    public String showAllUsers(Principal principal, Model model) {
+        model.addAttribute("userAuth", userService.findUserByEmail(principal.getName()));
         model.addAttribute("users", userService.showAllUsers());
+        model.addAttribute("roles", roleService.findAllRoles());
+        model.addAttribute("user", new User());
         return "admin";
     }
 
-    @GetMapping("/new")
-    public String newUser(Model model, @ModelAttribute("user") User user) {
-        model.addAttribute("roles", roleService.findAllRoles());
-        return "new";
-    }
-
-    @PostMapping()
+    @PostMapping("/add")
     public String createUser(@ModelAttribute("user") User user) {
         userService.saveUser(user);
         return "redirect:/admin";
     }
 
-    @GetMapping("/{id}/edit")
-    public String editUser(Model model, @PathVariable("id") long id) {
-        model.addAttribute("user", userService.findUserById(id));
-        model.addAttribute("roles", roleService.findAllRoles());
-        return "edit";
-    }
-
-    @PatchMapping("/{id}")
+    @PatchMapping("/edit/{id}")
     public String updateUser(@ModelAttribute("users") User user) {
         userService.updateUser(user);
         return "redirect:/admin";
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public String deleteUser(@PathVariable("id") long id) {
         userService.deleteUserById(id);
         return "redirect:/admin";
