@@ -12,10 +12,7 @@ import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,12 +31,11 @@ public class UserServiceImp implements UserService {
     @Override
     @Transactional
     public boolean saveUser(User user) {
-        User userFromDB = userRepository.findByEmail(user.getEmail());
 
+        User userFromDB = userRepository.findByEmail(user.getEmail());
         if (userFromDB != null) {
             return false;
         }
-
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         return true;
@@ -47,25 +43,28 @@ public class UserServiceImp implements UserService {
 
     @Override
     public User findUserById(long id) {
-        Optional<User> user = userRepository.findById(id);
-        return user.orElseThrow();
+
+        return userRepository.findById(id).orElse(null);
     }
 
     @Override
     public User findUserByEmail(String email) {
+
         return userRepository.findByEmail(email);
     }
 
     @Override
     @Transactional
-    public void updateUser(User user) {
+    public boolean updateUser(User user) {
         User userFromDB = userRepository.findByEmail(user.getEmail());
+
         if(!Objects.equals(user.getPassword(), "")) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         } else {
             user.setPassword(userFromDB.getPassword());
         }
         userRepository.save(user);
+        return true;
     }
 
     @Override
@@ -76,7 +75,9 @@ public class UserServiceImp implements UserService {
 
     @Override
     public List<User> showAllUsers() {
-        return userRepository.findAll();
+        return userRepository.findAll().stream()
+                .sorted(Comparator.comparing(User::getId))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override

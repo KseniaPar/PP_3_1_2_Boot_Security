@@ -10,7 +10,7 @@ public interface UserService extends UserDetailsService {
     boolean saveUser(User user);
     User findUserById(long id);
     User findUserByEmail(String email);
-    void updateUser(User user);
+    boolean updateUser(User user);
     void deleteUserById(long id);
     List<User> showAllUsers();
 
